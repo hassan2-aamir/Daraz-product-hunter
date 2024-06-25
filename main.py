@@ -38,7 +38,6 @@ chrome_options.add_argument("--headless")  # Run Chrome in headless mode
 chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
 
 # Set up Chrome driver
-driver_path = r'C:\Users\hp\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\chromedriver_win32\chromedriver.exe' # Replace with your actual path to chromedriver
 driver = webdriver.Chrome(options=chrome_options)
 
 # Define the URL
@@ -66,20 +65,20 @@ data = {
     'current price': [],
     'original price': [],
     'discount': [],
-    'link': []
+    'link': [],
+    'rating' : []
 }
 
 # Iterate over the product list and extract the data
-for i in productList:
+for i in tqdm(productList):
     data['name'].append(i.find('div', attrs={'class': 'fs-card-title'}).text)
     data['current price'].append(i.find('div', attrs={'class': 'fs-card-price'}).find('span', class_='price').text)
     data['original price'].append(i.find('div', class_='fs-card-origin-price').find('span', class_='price').text)
     data['discount'].append(i.find('span', class_='fs-discount').text.strip())
     data['link'].append(i['href'])
+    data['rating'].append('-')
 
-# Create a DataFrame from the data dictionary
-data = pd.DataFrame(data)
+categories = ['grocers-shop','beauty-health','mens-fashion','womens-fashion','mother-baby','bedding-bath','furniture-decor','kitchen-dining','laundry-cleaning','home-improvement-tools','stationery-craft','books-games-music','phones-tablets','computing','consumer-electronics','camera','home-appliances','sports-travel','jewellery-watches-eyewear','bags-travel','motors-vehicles',]
 
-# Print the DataFrame
-print(data)
+
 
