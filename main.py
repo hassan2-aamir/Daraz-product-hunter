@@ -31,6 +31,7 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
+import urllib3
 
 # Set up Selenium options
 chrome_options = Options()
@@ -50,9 +51,6 @@ driver.get(url)
 time.sleep(3)
 page_source = driver.page_source
 
-# Close the driver
-driver.quit()
-
 # Parse the page source with BeautifulSoup
 soup = BeautifulSoup(page_source, "lxml")
 
@@ -64,7 +62,6 @@ data = {
     'name': [],
     'current price': [],
     'original price': [],
-    'discount': [],
     'link': [],
     'rating' : []
 }
@@ -74,11 +71,30 @@ for i in tqdm(productList):
     data['name'].append(i.find('div', attrs={'class': 'fs-card-title'}).text)
     data['current price'].append(i.find('div', attrs={'class': 'fs-card-price'}).find('span', class_='price').text)
     data['original price'].append(i.find('div', class_='fs-card-origin-price').find('span', class_='price').text)
-    data['discount'].append(i.find('span', class_='fs-discount').text.strip())
     data['link'].append(i['href'])
     data['rating'].append('-')
 
-categories = ['grocers-shop','beauty-health','mens-fashion','womens-fashion','mother-baby','bedding-bath','furniture-decor','kitchen-dining','laundry-cleaning','home-improvement-tools','stationery-craft','books-games-music','phones-tablets','computing','consumer-electronics','camera','home-appliances','sports-travel','jewellery-watches-eyewear','bags-travel','motors-vehicles',]
+categories = ['grocers-shop','beauty-health','mens-fashion','womens-fashion','mother-baby','bedding-bath','furniture-decor','kitchen-dining','laundry-cleaning','home-improvement-tools','stationery-craft','books-games-music','phones-tablets','computing','consumer-electronics','camera','home-appliances','sports-travel','jewellery-watches-eyewear','bags-travel']
 
+for c in tqdm(categories):
+    url = "https://www.daraz.pk/" + c+ "/?page=1&sort=order"
+    driver.get(url)
+    time.sleep(3)
+    page_source = driver.page_source
+    soup = BeautifulSoup(page_source, "lxml")
 
+    productList = soup.findAll('a', attrs={'class': 'product-card--vHfY9'})
+    if len(productList) < 5:
+        continue
+    for i in tqdm(range(5)):
+        item = productList[i].find('div', attrs={'class': 'description--H8JN9'})
+        data['name'].append(item.find('div', attrs={'class': 'title-wrapper--IaQ0m'}).text)
+        data['current price'].append(item.find('div', attrs={'id': 'id-price'}).find('div', attrs={'class':'price-wrapper--S5vS_'}).find('div',attrs={'class': 'current-price--Jklkc'}).find('span',attrs={'class': 'currency--GVKjl'}).text)
+        data['original price'].append(item.find('div', attrs={'id': 'id-price'}).find('div', attrs={'class':'price-wrapper--S5vS_'}).find('div',attrs={'class': 'original-price--lHYOH'}).find('del',attrs={'class': 'currency--GVKjl'}).text)
+        data['link'].append(productList[i]['href'])
+        data['rating'].append(item.find('div', attrs={'class': 'rating-wrapper--caEhB'}).find('div', attrs={'class': 'rating--ZI3Ol rating--pwPrV'}).find('span', attrs={'class': 'ratig-num--KNake rating--pwPrV'}).text)
 
+driver.quit()
+data = pd.DataFrame(data)
+
+print(data)
