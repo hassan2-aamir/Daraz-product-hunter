@@ -97,4 +97,5 @@ for c in tqdm(categories):
 driver.quit()
 data = pd.DataFrame(data)
 
-print(data)
+#save data to topproducts.csv
+data.to_csv('topproducts.csv', index=False)
